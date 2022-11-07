@@ -43,8 +43,8 @@ export class UsersService {
     const payload = {
       username: user.userName,
       sub: user.userEntityId,
-      email: user.usersEmail[0].pmailAddress,
-      roles: user.usersRoles[0].usroRole.roleName,
+      email: user.usersEmail ? user.usersEmail[0].pmailAddress : null,
+      roles: user.usersRoles ? user.usersRoles[0].usroRole.roleName : null,
     };
     return {
       access_token: this.jwtService.sign(payload),
@@ -54,8 +54,6 @@ export class UsersService {
   public async signup(fields: any) {
     try {
       const EntityId = await this.entity.save({});
-      console.log(EntityId);
-      console.log();
 
       let hashpassword = fields.password;
       hashpassword = await Bcrypt.hash(hashpassword, saltOrRounds);
