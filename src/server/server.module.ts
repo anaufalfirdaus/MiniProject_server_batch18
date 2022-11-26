@@ -14,6 +14,11 @@ import { UsersPhones } from '../entities/UsersPhones';
 import { UsersRoles } from '../entities/UsersRoles';
 import { Entities } from '../entities/Entities';
 import { Roles } from '../entities/Roles';
+import { Address } from '../entities/Address';
+import { UsersAddress } from '../entities/UsersAddress';
+import { UsersEducation } from '../entities/UsersEducation';
+import { UsersExperiences } from '../entities/UsersExperiences';
+import { UsersSkill } from '../entities/UsersSkill';
 
 @Module({
   imports: [
@@ -22,8 +27,13 @@ import { Roles } from '../entities/Roles';
       UsersEmail,
       UsersPhones,
       UsersRoles,
+      UsersAddress,
+      UsersEducation,
+      UsersExperiences,
+      UsersSkill,
       Entities,
       Roles,
+      Address,
     ]),
     MulterModule.register(ConfigMulter.UploadFiles()),
     PassportModule,
