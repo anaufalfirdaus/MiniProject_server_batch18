@@ -43,7 +43,7 @@ export class UsersService {
     const payload = {
       username: user.userName,
       sub: user.userEntityId,
-      email: user.usersEmail ? user.usersEmail[0].pmailAddress : null,
+      // email: user.usersEmail ? user.usersEmail[0].pmailAddress : null,
       roles: user.usersRoles ? user.usersRoles[0].usroRole.roleName : null,
     };
     return {

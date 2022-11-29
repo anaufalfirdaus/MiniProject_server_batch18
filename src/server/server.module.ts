@@ -14,6 +14,18 @@ import { UsersPhones } from '../entities/UsersPhones';
 import { UsersRoles } from '../entities/UsersRoles';
 import { Entities } from '../entities/Entities';
 import { Roles } from '../entities/Roles';
+import { Client } from '../entities/Client';
+import { ClientService } from './Services/client.srv';
+import { ClientController } from './Controller/client.con';
+import { EmployeeClientContract } from '../entities/EmployeeClientContract';
+import { AlumniService } from './Services/alumni.srv';
+import { AlumniController } from './Controller/alumni.con';
+import { ProgramsReview } from '../entities/ProgramsReview';
+import { ProgramEntity } from '../entities/ProgramEntity';
+import { ProgramController } from './Controller/program.con';
+import { ProgramService } from './Services/program.srv';
+import { Batch } from '../entities/Batch';
+import { BatchStudent } from '../entities/BatchStudent';
 
 @Module({
   imports: [
@@ -24,6 +36,12 @@ import { Roles } from '../entities/Roles';
       UsersRoles,
       Entities,
       Roles,
+      Client,
+      EmployeeClientContract,
+      ProgramsReview,
+      ProgramEntity,
+      Batch,
+      BatchStudent,
     ]),
     MulterModule.register(ConfigMulter.UploadFiles()),
     PassportModule,
@@ -32,8 +50,20 @@ import { Roles } from '../entities/Roles';
       signOptions: { expiresIn: '60d' },
     }),
   ],
-  providers: [UsersService, LocalStrategy, JwtStrategy],
-  controllers: [UserController],
+  providers: [
+    UsersService,
+    LocalStrategy,
+    JwtStrategy,
+    ClientService,
+    AlumniService,
+    ProgramService,
+  ],
+  controllers: [
+    UserController,
+    ClientController,
+    AlumniController,
+    ProgramController,
+  ],
   exports: [UsersService],
 })
 export class ServerModule {}
