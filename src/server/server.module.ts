@@ -19,6 +19,11 @@ import { UsersAddress } from '../entities/UsersAddress';
 import { UsersEducation } from '../entities/UsersEducation';
 import { UsersExperiences } from '../entities/UsersExperiences';
 import { UsersSkill } from '../entities/UsersSkill';
+import { AddressType } from '../entities/AddressType';
+import { City } from '../entities/City';
+import { JobType } from '../entities/JobType';
+import { SkillType } from '../entities/SkillType';
+import { Status } from '../entities/Status';
 
 @Module({
   imports: [
@@ -34,6 +39,11 @@ import { UsersSkill } from '../entities/UsersSkill';
       Entities,
       Roles,
       Address,
+      AddressType,
+      City,
+      JobType,
+      SkillType,
+      Status,
     ]),
     MulterModule.register(ConfigMulter.UploadFiles()),
     PassportModule,

@@ -7,6 +7,8 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  Patch,
+  Delete,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from '../Services/usr.srv';
@@ -37,87 +39,103 @@ export class UserController {
     return this.authService.getProfile(id);
   }
 
-  // TODO: Update Profile
-  @Post('profileupdate/:userId')
-  async profileUpdate(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Body() fields: any,
+  // TODO: Add ------
+  @Post('addemail')
+  async addEmail(@Body() fields: any) {
+    return this.authService.addEmail(fields);
+  }
+
+  @Post('addphone')
+  async addPhone(@Body() fields: any) {
+    return this.authService.addPhone(fields);
+  }
+
+  @Post('addaddress')
+  async addAddress(@Body() fields: any) {
+    return this.authService.addAddress(fields);
+  }
+
+  @Post('addeducation')
+  async addEducation(@Body() fields: any) {
+    return this.authService.addEducation(fields);
+  }
+
+  @Post('addexperience')
+  async addExperience(@Body() fields: any) {
+    return this.authService.addExperience(fields);
+  }
+
+  @Post('addskill')
+  async addSkill(@Body() fields: any) {
+    return this.authService.addSkill(fields);
+  }
+
+  // TODO: update ------
+  @Patch('profileupdate')
+  async profileUpdate(@Body() fields: any) {
+    return this.authService.updateProfile(fields);
+  }
+
+  @Patch('passwordupdate')
+  async passwordUpdate(@Body() fields: any) {
+    return await this.authService.updatePassword(fields);
+  }
+
+  @Patch('updateemail')
+  async updateEmail(@Body() fields: any) {
+    return fields;
+  }
+
+  @Patch('updatephone')
+  async updatePhone(@Body() fields: any) {
+    return fields;
+  }
+
+  @Patch('updateaddress')
+  async updateAddress(@Body() fields: any) {
+    return fields;
+  }
+
+  @Patch('updateeducation')
+  async updateEducation(@Body() fields: any) {
+    return fields;
+  }
+
+  @Patch('updateexperience')
+  async updateExperience(@Body() fields: any) {
+    return fields;
+  }
+
+  //TODO: Delete/Remove ------
+  @Delete('removeemail/:emailId')
+  async removeEmail(@Param('emailId', ParseIntPipe) emailId: number) {
+    return await this.authService.removeEmail(emailId);
+  }
+
+  @Delete('removephone/:phoneId')
+  async removePhone(@Param('phoneId', ParseIntPipe) phoneId: number) {
+    return await this.authService.removePhone(phoneId);
+  }
+
+  @Delete('removeaddress/:addressId')
+  async removeAddress(@Param('addressId', ParseIntPipe) addressId: number) {
+    return await this.authService.removeAddress(addressId);
+  }
+
+  @Delete('removeEducation/:educationId')
+  async removeEducation(
+    @Param('educationId', ParseIntPipe) educationId: number,
   ) {
-    return this.authService.updateProfile(userId, fields);
+    return this.authService.removeEducation(educationId);
   }
 
-  // TODO: update password
-  @Post('passwordupdate/:userId')
-  async passwordUpdate(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Body() fields: any,
-  ) {
-    // return { userId, fields };
-    return await this.authService.updatePassword(userId, fields);
+  @Delete('removeExperience/:expId')
+  async removeExperience(@Param('expId', ParseIntPipe) expId: number) {
+    return this.authService.removeExperience(expId);
   }
 
-  // * EMAILS
-  @Get('getemails/:userId')
-  async getEmails(@Param('userId', ParseIntPipe) userId: number) {
-    return this.authService.getEmails(userId);
-  }
-
-  @Post('addemail/:id')
-  async addEmail(
-    @Param('id', ParseIntPipe) id: number,
-    @Body('email') email: any,
-  ) {
-    return this.authService.addEmail(id, email);
-  }
-
-  @Get('removeemail/:id')
-  async removeEmail(@Param('id', ParseIntPipe) id: number) {
-    return await this.authService.removeEmail(id);
-  }
-  // TODO: the phones table not an Array ✅
-  @Post('addphone/:id')
-  async addPhone(@Param('id', ParseIntPipe) id: number, @Body() field: any) {
-    return this.authService.addPhone(id, field);
-  }
-
-  @Post('removephone')
-  async removePhone(
-    @Body('userId', ParseIntPipe) userId: number,
-    @Body('phoneId', ParseIntPipe) phoneId: number,
-  ) {
-    return await this.authService.removePhone(userId, phoneId);
-  }
-
-  // TODO:
-  @Post('addaddress/:userId')
-  async addAddress(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Body() fields: any,
-  ) {
-    return this.authService.addAddress(userId, fields);
-  }
-
-  @Post('addeducation/:userId')
-  async addEducation(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Body() fields: any,
-  ) {
-    return this.authService.addEducation(userId, fields);
-  }
-
-  @Post('addexperience/:userId')
-  async addExperience(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Body() fields: any,
-  ) {
-    return this.authService.addExperience(userId, fields);
-  }
-
-  @Post('addskill/:userId')
-  async addSkill(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Body() fields: any,
-  ) {
-    return this.authService.addSkill(userId, fields);
+  @Delete('removeskill/:skillId')
+  async removeSkill(@Param('skillId', ParseIntPipe) skillId: number) {
+    return this.authService.removeSkill(skillId);
   }
 }
