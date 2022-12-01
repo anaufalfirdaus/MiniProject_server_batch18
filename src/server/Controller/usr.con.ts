@@ -39,6 +39,11 @@ export class UserController {
     return this.authService.getProfile(id);
   }
 
+  @Get('getphone/:id')
+  async getEmail(@Param('id', ParseIntPipe) id: number) {
+    return this.authService.getPhone(id);
+  }
+
   // TODO: Add ------
   @Post('addemail')
   async addEmail(@Body() fields: any) {
@@ -83,12 +88,12 @@ export class UserController {
 
   @Patch('updateemail')
   async updateEmail(@Body() fields: any) {
-    return fields;
+    return this.authService.updateEmail(fields);
   }
 
   @Patch('updatephone')
   async updatePhone(@Body() fields: any) {
-    return fields;
+    return this.authService.updatePhone(fields);
   }
 
   @Patch('updateaddress')

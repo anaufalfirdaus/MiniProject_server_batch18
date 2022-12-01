@@ -396,7 +396,8 @@ export class UsersService {
     });
 
     if (remExp) {
-      return await this.userExperience.remove(remExp);
+      await this.userExperience.remove(remExp);
+      return { usexId: expId };
     }
 
     return {
@@ -411,12 +412,49 @@ export class UsersService {
     });
 
     if (remSkill) {
-      return await this.skillRepository.remove(remSkill);
+      await this.skillRepository.remove(remSkill);
+      return { uskiId: skillId };
     }
 
     return {
       info: 'failed',
       message: 'Skill not found, please try again later',
     };
+  }
+
+  //TODO: UPDATE-------
+  public async updateEmail(dataUpdate: any) {
+    const email = await this.usersEmail.findOne({
+      where: { pmailId: dataUpdate.emailId, pmailEntityId: dataUpdate.userId },
+    });
+    Object.assign(email, dataUpdate);
+    return await this.usersEmail.save(email);
+  }
+
+  public async getPhone(id: number) {
+    const phone = await this.usersPhone.findOne({
+      relations: {
+        uspoPontyCode: true,
+      },
+      where: {
+        uspoPhoneId: id,
+      },
+    });
+    return phone;
+  }
+
+  public async updatePhone(dataUpdate: any) {
+    const phone = await this.usersPhone.findOne({
+      relations: {
+        uspoPontyCode: true,
+      },
+      where: {
+        uspoEntity: dataUpdate.uspoEntity,
+        uspoPhoneId: dataUpdate.uspoPhoneId,
+      },
+    });
+    Object.assign(phone, dataUpdate);
+    phone.uspoPontyCode.pontyCode = dataUpdate.pontyCode;
+    return await this.usersPhone.save(phone);
   }
 }
