@@ -7,6 +7,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import { Address } from "./Address";
 import { Client } from "./Client";
 import { Employee } from "./Employee";
 import { JobCategory } from "./JobCategory";
@@ -37,6 +38,12 @@ export class JobPost {
 
   @Column("integer", { name: "jopo_max_salary", nullable: true })
   jopoMaxSalary: number | null;
+  
+  @Column("integer", { name: "jopo_min_experience", nullable: true })
+  jopoMinExperience: number | null;
+
+  @Column("integer", { name: "jopo_max_experience", nullable: true })
+  jopoMaxExperience: number | null;
 
   @Column("json", { name: "jopo_description", nullable: true })
   jopoDescription: object | null;
@@ -81,12 +88,20 @@ export class JobPost {
   })
   jopoStatus: string | null;
 
+  @Column("character varying", {
+    name: "jopo_skill",
+    nullable: true,
+    length: 50,
+  })
+  jopoSkill: string | null;
+
   @ManyToOne(() => Client, (client) => client.jobPosts, {
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
   })
   @JoinColumn([{ name: "jopo_clit_id", referencedColumnName: "clitId" }])
   jopoClit: Client;
+
 
   @ManyToOne(() => Employee, (employee) => employee.jobPosts, {
     onDelete: "CASCADE",

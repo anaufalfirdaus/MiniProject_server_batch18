@@ -39,6 +39,13 @@ export class Client {
   })
   clitModifiedDate: Date | null;
 
+  @Column('character varying', {
+    name: 'clit_logo',
+    nullable: true,
+    length: 255,
+  })
+  clitLogo: string | null;
+
   @ManyToOne(() => Address, (address) => address.clients, {
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
