@@ -14,6 +14,14 @@ import { UsersPhones } from '../entities/UsersPhones';
 import { UsersRoles } from '../entities/UsersRoles';
 import { Entities } from '../entities/Entities';
 import { Roles } from '../entities/Roles';
+import { CourseReview } from '../entities/CourseReview';
+import { courseReviewService } from './Services/CourseReview.service';
+import { courseReviewController } from './Controller/CourseReview.controller';
+import { ProgramEntity } from '../entities/ProgramEntity';
+import { programEntityService } from './Services/ProgramEntity.service';
+import { programEntityController } from './Controller/ProgramEntity.controller';
+import { usersService } from './Services/Users.service';
+import { usersController } from './Controller/Users.controller';
 
 @Module({
   imports: [
@@ -24,6 +32,8 @@ import { Roles } from '../entities/Roles';
       UsersRoles,
       Entities,
       Roles,
+      CourseReview,
+      ProgramEntity,
     ]),
     MulterModule.register(ConfigMulter.UploadFiles()),
     PassportModule,
@@ -32,8 +42,20 @@ import { Roles } from '../entities/Roles';
       signOptions: { expiresIn: '60d' },
     }),
   ],
-  providers: [UsersService, LocalStrategy, JwtStrategy],
-  controllers: [UserController],
+  providers: [
+    UsersService,
+    LocalStrategy,
+    JwtStrategy,
+    courseReviewService,
+    programEntityService,
+    usersService,
+  ],
+  controllers: [
+    UserController,
+    courseReviewController,
+    programEntityController,
+    usersController,
+  ],
   exports: [UsersService],
 })
 export class ServerModule {}
