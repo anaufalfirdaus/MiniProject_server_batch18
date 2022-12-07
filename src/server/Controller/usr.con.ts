@@ -86,6 +86,14 @@ export class UserController {
     return await this.authService.updatePassword(fields);
   }
 
+  @Patch('uploadphoto')
+  async uploadPhoto(@Body() fields: any) {
+    return await this.authService.updateProfileImage(
+      Number(fields.id),
+      fields.imageUrl,
+    );
+  }
+
   @Patch('updateemail')
   async updateEmail(@Body() fields: any) {
     return this.authService.updateEmail(fields);
@@ -98,17 +106,17 @@ export class UserController {
 
   @Patch('updateaddress')
   async updateAddress(@Body() fields: any) {
-    return fields;
+    return this.authService.updateAddress(fields);
   }
 
   @Patch('updateeducation')
   async updateEducation(@Body() fields: any) {
-    return fields;
+    return this.authService.updateEducation(fields);
   }
 
   @Patch('updateexperience')
   async updateExperience(@Body() fields: any) {
-    return fields;
+    return this.authService.updateExperience(fields);
   }
 
   //TODO: Delete/Remove ------

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as Bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -71,6 +71,7 @@ export class UsersService {
       sub: user.userEntityId,
       email: user.usersEmail ? user.usersEmail[0].pmailAddress : null,
       roles: user.usersRoles ? user.usersRoles[0].usroRole.roleName : null,
+      userPhoto: user.userPhoto,
     };
     return {
       access_token: this.jwtService.sign(payload),
@@ -157,6 +158,7 @@ export class UsersService {
     const jobType = await this.jobTypeRepo.find();
     const skillType = await this.skillTypeRepo.find();
     const statusType = await this.statusTypeRepo.find();
+    const listAddresses = await this.addressRepository.find();
 
     return {
       ...rest,
@@ -168,6 +170,7 @@ export class UsersService {
       jobType,
       skillType,
       statusType,
+      listAddresses,
     };
   }
 
@@ -230,6 +233,15 @@ export class UsersService {
     };
   }
 
+  // TODO: upload photo
+  public async updateProfileImage(id: number, imageUrl: string) {
+    const user = await this.usersRepo.findOne({
+      where: { userEntityId: id },
+    });
+    user.userPhoto = imageUrl;
+    return await this.usersRepo.save(user);
+  }
+
   //TODO : ADD ---------
   public async addEmail(fields: any) {
     const newEmail = this.usersEmail.create({
@@ -253,7 +265,39 @@ export class UsersService {
   }
 
   public async addAddress(dataAddress: any) {
-    // * ADD new Address to table Address
+    // * CHECK IF Address Exist
+    const addressExist = await this.addressRepository.findOne({
+      where: {
+        addrLine1: dataAddress.addressLine1,
+        addrLine2: dataAddress.addressLine2,
+        addrPostalCode: dataAddress.addressPostalCode,
+      },
+    });
+    // * IF Addres Exist just add to usersAddress table
+    // * Check If address already exist on usersAddress Table
+    // * If userAddress exist return with warning
+    if (addressExist) {
+      const userAddressExist = await this.userAddress.findOne({
+        where: { etadAddrId: addressExist.addrId },
+      });
+      if (userAddressExist) {
+        // * Sending 409 HTTP Code
+        throw new ConflictException('Address already exist on users table');
+      }
+    }
+    // * If Address exist just update the user Address table
+    if (addressExist) {
+      const newAddressUser = this.userAddress.create({
+        etadAddr: { addrId: addressExist.addrId },
+        etadEntity: { userEntityId: dataAddress.userId },
+        etadAdty: { adtyId: dataAddress.addressType },
+        etadModifiedDate: new Date(Date.now()).toISOString(),
+      });
+      const newAdds = await this.userAddress.save(newAddressUser);
+      return this.getAddress(newAdds.etadAddrId);
+    }
+    //* If Address not exist
+    //* Create new Address if not exist
     const newAddress = this.addressRepository.create({
       addrLine1: dataAddress.addressLine1,
       addrLine2: dataAddress.addressLine2,
@@ -430,7 +474,7 @@ export class UsersService {
     Object.assign(email, dataUpdate);
     return await this.usersEmail.save(email);
   }
-
+  // * Helper Function
   public async getPhone(id: number) {
     const phone = await this.usersPhone.findOne({
       relations: {
@@ -456,5 +500,68 @@ export class UsersService {
     Object.assign(phone, dataUpdate);
     phone.uspoPontyCode.pontyCode = dataUpdate.pontyCode;
     return await this.usersPhone.save(phone);
+  }
+  //TODO : Need to fix
+  public async updateAddress(dataUpdate: any) {
+    // check if address Exist
+    const addressExist = await this.addressRepository.findOne({
+      where: {
+        addrLine1: dataUpdate.addrLine1,
+        addrLine2: dataUpdate.addrLine2,
+        addrPostalCode: dataUpdate.addrPostalCode,
+      },
+    });
+    if (addressExist) {
+      const addressUserExist = await this.userAddress.findOne({
+        where: {
+          etadAddrId: addressExist.addrId,
+        },
+      });
+      // check if address alredy added on user address
+      if (addressUserExist) {
+        throw new ConflictException('Address Already Added on user account');
+      }
+    }
+    // if address not exist create new address
+    const createAddress = this.addressRepository.create({
+      addrLine1: dataUpdate.addrLine1,
+      addrLine2: dataUpdate.addrLine2,
+      addrPostalCode: dataUpdate.addrPostalCode,
+      addrCity: { cityId: dataUpdate.city },
+      addrModifiedDate: new Date(Date.now()).toISOString(),
+    });
+    // save new address and edit the old address on users table
+    const newAddress = await this.addressRepository.save(createAddress);
+    const userAddress = await this.userAddress.findOne({
+      where: { etadAddrId: dataUpdate.addressId },
+    });
+    Object.assign(userAddress, dataUpdate);
+    userAddress.etadAddrId = newAddress.addrId;
+    await this.userAddress.save(userAddress);
+    return this.getAddress(userAddress.etadAddrId);
+  }
+
+  public async updateEducation(dataUpdate: any) {
+    const education = await this.educationRepository.findOne({
+      where: { usduId: dataUpdate.usduId },
+    });
+    const { startYear, startMonth, endMonth, endYear, ...updateRest } =
+      dataUpdate;
+    Object.assign(education, updateRest);
+    education.usduStartDate = new Date(startYear, startMonth, 1);
+    education.usduEndDate = new Date(endYear, endMonth, 1);
+    return await this.educationRepository.save(education);
+  }
+
+  public async updateExperience(dataUpdate: any) {
+    const exp = await this.userExperience.findOne({
+      where: { usexId: dataUpdate.usexId },
+    });
+    const { startMonth, startYear, endMonth, endYear, ...restUpdate } =
+      dataUpdate;
+    Object.assign(exp, restUpdate);
+    exp.usexStartDate = new Date(startYear, startMonth, 1);
+    exp.usexEndDate = new Date(endYear, endMonth);
+    return await this.userExperience.save(exp);
   }
 }

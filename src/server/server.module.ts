@@ -24,6 +24,9 @@ import { City } from '../entities/City';
 import { JobType } from '../entities/JobType';
 import { SkillType } from '../entities/SkillType';
 import { Status } from '../entities/Status';
+import { CurriculumService } from './Services/curriculum.service';
+import { CurriculumController } from './Controller/curriculum.controller';
+import { ProgramEntity } from '../entities/ProgramEntity';
 
 @Module({
   imports: [
@@ -44,6 +47,7 @@ import { Status } from '../entities/Status';
       JobType,
       SkillType,
       Status,
+      ProgramEntity,
     ]),
     MulterModule.register(ConfigMulter.UploadFiles()),
     PassportModule,
@@ -52,8 +56,8 @@ import { Status } from '../entities/Status';
       signOptions: { expiresIn: '60d' },
     }),
   ],
-  providers: [UsersService, LocalStrategy, JwtStrategy],
-  controllers: [UserController],
+  providers: [UsersService, CurriculumService, LocalStrategy, JwtStrategy],
+  controllers: [UserController, CurriculumController],
   exports: [UsersService],
 })
 export class ServerModule {}
