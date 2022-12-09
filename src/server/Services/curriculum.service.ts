@@ -18,4 +18,19 @@ export class CurriculumService {
       },
     });
   }
+
+  async removeById(id: number) {
+    const curriculum = await this.curriculumRepo.findOne({
+      where: { progId: id },
+    });
+    const remCurriculum = await this.curriculumRepo.remove(curriculum);
+
+    if (remCurriculum) {
+      return { id: id };
+    }
+    return {
+      info: 'Failed',
+      message: 'Something went wrong, please try again later',
+    };
+  }
 }

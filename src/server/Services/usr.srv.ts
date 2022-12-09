@@ -513,9 +513,10 @@ export class UsersService {
     });
     if (addressExist) {
       const addressUserExist = await this.userAddress.findOne({
-        where: {
-          etadAddrId: addressExist.addrId,
-        },
+        where: [
+          { etadAddrId: dataUpdate.addressId },
+          { etadEntity: { userEntityId: dataUpdate.userId } },
+        ],
       });
       // check if address alredy added on user address
       if (addressUserExist) {

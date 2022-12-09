@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Delete, ParseIntPipe, Param } from '@nestjs/common';
 import { CurriculumService } from '../Services/curriculum.service';
 
 @Controller('curriculums')
@@ -8,5 +8,10 @@ export class CurriculumController {
   @Get()
   private getCurriculums() {
     return this.curriculumService.getAll();
+  }
+
+  @Delete(':id')
+  private removeCurriculum(@Param('id', ParseIntPipe) id: number) {
+    return this.curriculumService.removeById(id);
   }
 }
