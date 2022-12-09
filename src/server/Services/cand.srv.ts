@@ -139,24 +139,6 @@ export class CandService {
     });
   }
 
-  // public async getBoot(): Promise<BootcampApply[]> {
-  //   const getBootcamp = await this.boot.find({
-  //     relations: ['boapEntity', 'boapProg'],
-  //     select: {
-  //       boapEntity: {
-  //         userEntityId: true,
-  //         //usersEmail: { pmailId: true },
-  //         userName: true,
-  //       },
-  //       boapProg: { progId: true, progTitle: true },
-  //     },
-  //     order: {
-  //       boapModifiedDate: 'desc',
-  //     },
-  //   });
-  //   return getBootcamp;
-  // }
-
   public async updateApply(boapEntityId: number, fields: any) {
     try {
       const app = await this.boot.findOne({
