@@ -35,6 +35,12 @@ import { ProgramEntitiesServices } from './Services/prog.srv';
 import { CoursesServices } from './Services/corse.srv';
 import { CorseControll } from './Controller/corse.con';
 import { Courses } from '../entities/Courses';
+import { InstructorCourse } from '../entities/InstructorCourse';
+import { InstructorCoursesServices } from './Services/inco.srv';
+import { IncoControll } from './Controller/inco.con';
+import { ContentSectionMaterial } from '../entities/ContentSectionMaterial';
+import { CosmControll } from './Controller/cosm.con';
+import { CosmServices } from './Services/cosm.srv';
 
 @Module({
   imports: [
@@ -52,6 +58,8 @@ import { Courses } from '../entities/Courses';
       SkillType,
       ProgramEntity,
       Courses,
+      InstructorCourse,
+      ContentSectionMaterial,
     ]),
     MulterModule.register(ConfigMulter.UploadFiles()),
     PassportModule,
@@ -71,6 +79,8 @@ import { Courses } from '../entities/Courses';
     SkillTypeServices,
     ProgramEntitiesServices,
     CoursesServices,
+    InstructorCoursesServices,
+    CosmServices,
   ],
   controllers: [
     UserController,
@@ -81,6 +91,8 @@ import { Courses } from '../entities/Courses';
     SktyControll,
     ProgControll,
     CorseControll,
+    IncoControll,
+    CosmControll,
   ],
   exports: [
     UsersService,
@@ -91,6 +103,8 @@ import { Courses } from '../entities/Courses';
     SkillTypeServices,
     ProgramEntitiesServices,
     CoursesServices,
+    InstructorCoursesServices,
+    CosmServices,
   ],
 })
 export class ServerModule {}
