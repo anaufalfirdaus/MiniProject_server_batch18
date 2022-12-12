@@ -266,36 +266,40 @@ export class UsersService {
 
   public async addAddress(dataAddress: any) {
     // * CHECK IF Address Exist
-    const addressExist = await this.addressRepository.findOne({
-      where: {
-        addrLine1: dataAddress.addressLine1,
-        addrLine2: dataAddress.addressLine2,
-        addrPostalCode: dataAddress.addressPostalCode,
-      },
+    const addressExist = await this.addressRepository.find({
+      where: [
+        { addrLine1: dataAddress.addressLine1 },
+        { addrLine2: dataAddress.addressLine2 },
+        { addrPostalCode: dataAddress.addressPostalCode },
+      ],
     });
     // * IF Addres Exist just add to usersAddress table
     // * Check If address already exist on usersAddress Table
     // * If userAddress exist return with warning
-    if (addressExist) {
+    if (addressExist.length > 0) {
       const userAddressExist = await this.userAddress.findOne({
-        where: { etadAddrId: addressExist.addrId },
+        where: { etadAddrId: addressExist[0].addrId },
       });
+
       if (userAddressExist) {
         // * Sending 409 HTTP Code
         throw new ConflictException('Address already exist on users table');
       }
+
+      try {
+        const newAddressUser = this.userAddress.create({
+          etadAddr: { addrId: addressExist[0].addrId },
+          etadEntity: { userEntityId: dataAddress.userId },
+          etadAdty: { adtyId: dataAddress.addressType },
+          etadModifiedDate: new Date(Date.now()).toISOString(),
+        });
+        const newAdds = await this.userAddress.save(newAddressUser);
+        return this.getAddress(newAdds.etadAddrId);
+      } catch (error) {
+        throw new Error(error);
+      }
     }
-    // * If Address exist just update the user Address table
-    if (addressExist) {
-      const newAddressUser = this.userAddress.create({
-        etadAddr: { addrId: addressExist.addrId },
-        etadEntity: { userEntityId: dataAddress.userId },
-        etadAdty: { adtyId: dataAddress.addressType },
-        etadModifiedDate: new Date(Date.now()).toISOString(),
-      });
-      const newAdds = await this.userAddress.save(newAddressUser);
-      return this.getAddress(newAdds.etadAddrId);
-    }
+
     //* If Address not exist
     //* Create new Address if not exist
     const newAddress = this.addressRepository.create({
@@ -517,20 +521,24 @@ export class UsersService {
         where: { etadAddrId: dataUpdate.addressId },
       });
       await this.userAddress.remove(remUserAddress);
-      const newUserAddress = this.userAddress.create({
-        etadAddr: { addrId: addressExist[0].addrId },
-        etadEntity: { userEntityId: dataUpdate.userId },
-        etadAdty: { adtyId: dataUpdate.addressType },
-        etadModifiedDate: new Date(Date.now()).toISOString(),
-      });
-      await this.userAddress.save(newUserAddress);
-      return await this.userAddress.find({
-        where: { etadEntity: { userEntityId: dataUpdate.userId } },
-        relations: {
-          etadAddr: { addrCity: true },
-          etadAdty: true,
-        },
-      });
+      try {
+        const newUserAddress = this.userAddress.create({
+          etadEntity: { userEntityId: dataUpdate.userId },
+          etadAddr: { addrId: addressExist[0].addrId },
+          etadAdty: { adtyId: dataUpdate.addressType },
+          etadModifiedDate: new Date(Date.now()).toISOString(),
+        });
+        await this.userAddress.save(newUserAddress);
+        return await this.userAddress.find({
+          where: { etadEntity: { userEntityId: dataUpdate.userId } },
+          relations: {
+            etadAddr: { addrCity: true },
+            etadAdty: true,
+          },
+        });
+      } catch (error) {
+        throw new Error(error);
+      }
     }
     // if address not exist, then create new Address
     const newAddress = this.addressRepository.create({
