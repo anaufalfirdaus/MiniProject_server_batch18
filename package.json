@@ -19,7 +19,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "pg": "typeorm-model-generator -h 127.0.0.1 -d MiniProjectBatch18 -p 5432 -u postgres -x admin -e postgres"
+    "pg": "typeorm-model-generator -h 127.0.0.1 -d codeacademy_miniproject -p 5432 -u mattz -x doraemon08 -e postgres"
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",

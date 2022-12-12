@@ -14,6 +14,19 @@ import { UsersPhones } from '../entities/UsersPhones';
 import { UsersRoles } from '../entities/UsersRoles';
 import { Entities } from '../entities/Entities';
 import { Roles } from '../entities/Roles';
+import { Address } from '../entities/Address';
+import { UsersAddress } from '../entities/UsersAddress';
+import { UsersEducation } from '../entities/UsersEducation';
+import { UsersExperiences } from '../entities/UsersExperiences';
+import { UsersSkill } from '../entities/UsersSkill';
+import { AddressType } from '../entities/AddressType';
+import { City } from '../entities/City';
+import { JobType } from '../entities/JobType';
+import { SkillType } from '../entities/SkillType';
+import { Status } from '../entities/Status';
+import { CurriculumService } from './Services/curriculum.service';
+import { CurriculumController } from './Controller/curriculum.controller';
+import { ProgramEntity } from '../entities/ProgramEntity';
 
 @Module({
   imports: [
@@ -22,8 +35,19 @@ import { Roles } from '../entities/Roles';
       UsersEmail,
       UsersPhones,
       UsersRoles,
+      UsersAddress,
+      UsersEducation,
+      UsersExperiences,
+      UsersSkill,
       Entities,
       Roles,
+      Address,
+      AddressType,
+      City,
+      JobType,
+      SkillType,
+      Status,
+      ProgramEntity,
     ]),
     MulterModule.register(ConfigMulter.UploadFiles()),
     PassportModule,
@@ -32,8 +56,8 @@ import { Roles } from '../entities/Roles';
       signOptions: { expiresIn: '60d' },
     }),
   ],
-  providers: [UsersService, LocalStrategy, JwtStrategy],
-  controllers: [UserController],
+  providers: [UsersService, CurriculumService, LocalStrategy, JwtStrategy],
+  controllers: [UserController, CurriculumController],
   exports: [UsersService],
 })
 export class ServerModule {}
