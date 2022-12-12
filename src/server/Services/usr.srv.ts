@@ -137,7 +137,7 @@ export class UsersService {
         usersPhones: true,
         //* Address
         usersAddresses: {
-          etadAddr: true,
+          etadAddr: { addrCity: true },
           etadAdty: true,
         },
         //* Education
@@ -178,7 +178,7 @@ export class UsersService {
   public async getAddress(id: number) {
     return this.userAddress.findOne({
       relations: {
-        etadAddr: true,
+        etadAddr: { addrCity: true },
         etadAdty: true,
       },
       where: { etadAddrId: id },
@@ -405,11 +405,11 @@ export class UsersService {
   }
 
   public async removeAddress(addressId: number) {
-    const remAddress = await this.addressRepository.findOne({
-      where: { addrId: addressId },
+    const remAddress = await this.userAddress.findOne({
+      where: { etadAddrId: addressId },
     });
     if (remAddress) {
-      await this.addressRepository.remove(remAddress);
+      await this.userAddress.remove(remAddress);
       return { etadAddrId: addressId };
     }
 
@@ -503,43 +503,62 @@ export class UsersService {
   }
   //TODO : Need to fix
   public async updateAddress(dataUpdate: any) {
-    // check if address Exist
-    const addressExist = await this.addressRepository.findOne({
-      where: {
-        addrLine1: dataUpdate.addrLine1,
-        addrLine2: dataUpdate.addrLine2,
-        addrPostalCode: dataUpdate.addrPostalCode,
-      },
-    });
-    if (addressExist) {
-      const addressUserExist = await this.userAddress.findOne({
-        where: [
-          { etadAddrId: dataUpdate.addressId },
-          { etadEntity: { userEntityId: dataUpdate.userId } },
-        ],
-      });
-      // check if address alredy added on user address
-      if (addressUserExist) {
-        throw new ConflictException('Address Already Added on user account');
-      }
-    }
     // if address not exist create new address
-    const createAddress = this.addressRepository.create({
+    const addressExist = await this.addressRepository.find({
+      where: [
+        { addrLine1: dataUpdate.addrLine1 },
+        { addrLine2: dataUpdate.addrLine2 },
+        { addrPostalCode: dataUpdate.addrPostalCode },
+      ],
+    });
+    // if Address exist remove the old userAddress, then just add the new address to user
+    if (addressExist.length > 0) {
+      const remUserAddress = await this.userAddress.findOne({
+        where: { etadAddrId: dataUpdate.addressId },
+      });
+      await this.userAddress.remove(remUserAddress);
+      const newUserAddress = this.userAddress.create({
+        etadAddr: { addrId: addressExist[0].addrId },
+        etadEntity: { userEntityId: dataUpdate.userId },
+        etadAdty: { adtyId: dataUpdate.addressType },
+        etadModifiedDate: new Date(Date.now()).toISOString(),
+      });
+      await this.userAddress.save(newUserAddress);
+      return await this.userAddress.find({
+        where: { etadEntity: { userEntityId: dataUpdate.userId } },
+        relations: {
+          etadAddr: { addrCity: true },
+          etadAdty: true,
+        },
+      });
+    }
+    // if address not exist, then create new Address
+    const newAddress = this.addressRepository.create({
       addrLine1: dataUpdate.addrLine1,
       addrLine2: dataUpdate.addrLine2,
+      addrCity: { cityId: dataUpdate.cityId },
       addrPostalCode: dataUpdate.addrPostalCode,
-      addrCity: { cityId: dataUpdate.city },
       addrModifiedDate: new Date(Date.now()).toISOString(),
     });
-    // save new address and edit the old address on users table
-    const newAddress = await this.addressRepository.save(createAddress);
-    const userAddress = await this.userAddress.findOne({
+    const address = await this.addressRepository.save(newAddress);
+    const remUserAddress = await this.userAddress.findOne({
       where: { etadAddrId: dataUpdate.addressId },
     });
-    Object.assign(userAddress, dataUpdate);
-    userAddress.etadAddrId = newAddress.addrId;
-    await this.userAddress.save(userAddress);
-    return this.getAddress(userAddress.etadAddrId);
+    await this.userAddress.remove(remUserAddress);
+    const newUserAddress = this.userAddress.create({
+      etadAddr: { addrId: address.addrId },
+      etadEntity: { userEntityId: dataUpdate.userId },
+      etadAdty: { adtyId: dataUpdate.addressType },
+      etadModifiedDate: new Date(Date.now()).toISOString(),
+    });
+    await this.userAddress.save(newUserAddress);
+    return await this.userAddress.find({
+      where: { etadEntity: { userEntityId: dataUpdate.userId } },
+      relations: {
+        etadAddr: { addrCity: true },
+        etadAdty: true,
+      },
+    });
   }
 
   public async updateEducation(dataUpdate: any) {
