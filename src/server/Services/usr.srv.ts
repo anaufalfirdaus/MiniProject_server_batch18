@@ -538,6 +538,7 @@ export class UsersService {
       addrLine2: dataUpdate.addrLine2,
       addrCity: { cityId: dataUpdate.cityId },
       addrPostalCode: dataUpdate.addrPostalCode,
+      //* this is here cuz database not automaticly updateAt
       addrModifiedDate: new Date(Date.now()).toISOString(),
     });
     const address = await this.addressRepository.save(newAddress);
