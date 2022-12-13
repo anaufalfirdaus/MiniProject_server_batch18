@@ -3,9 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Users } from '../../entities/Users';
 import { Repository } from 'typeorm';
 import { Batch } from 'src/entities/Batch';
-import { UsersEducation } from 'src/entities/UsersEducation';
 import { BootcampApply } from 'src/entities/BootcampApply';
-import { ProgramEntity } from 'src/entities/ProgramEntity';
 
 @Injectable()
 export class CandService {
@@ -27,12 +25,6 @@ export class CandService {
         boapProg: true,
       },
       where: { boapStatus: 'Apply' },
-      // [
-      //   {
-      //     boapStatus: 'Apply',
-      //   },
-      //   { boapStatus: 'Ready Test' },
-      // ],
       order: {
         boapModifiedDate: 'desc',
       },
