@@ -34,6 +34,7 @@ export class UsersService {
     });
     const compare = await Bcrypt.compare(pass, user.userPassword);
     if (compare) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { userPassword, ...result } = user;
       return result;
     }
@@ -81,6 +82,7 @@ export class UsersService {
         usroRoleId: fields.usroRoleId,
         usroModifiedDate: new Date(),
       });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { userPassword, ...result } = user;
       return result;
     } catch (error) {

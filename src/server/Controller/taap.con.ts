@@ -19,6 +19,11 @@ export class TaapController {
     return this.taapService.findAll();
   }
 
+  @Get('/taap/user')
+  async GetAllUser() {
+    return this.taapService.getAllUser();
+  }
+
   @Get('taap/:id')
   public async GetOne(@Param('id') id: number) {
     return this.taapService.findOne(id);
@@ -65,5 +70,10 @@ export class TaapController {
   @Delete('/taap/:id')
   delete(@Param('id') id: number) {
     return this.taapService.delete(id);
+  }
+
+  @Post('/taap/apply')
+  public async Apply(@Body() fields: any) {
+    return this.taapService.Apply(fields);
   }
 }

@@ -163,8 +163,8 @@ export class JopoService {
 
   async delete(id: number) {
     try {
-      const jopo = await this.jopoRepo.delete(id);
-      return 'Delete' + jopo.affected + 'rows';
+      await this.jopoRepo.delete(id);
+      return { jopoId: id };
     } catch (error) {
       return error.message;
     }

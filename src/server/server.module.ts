@@ -23,6 +23,8 @@ import { TaapController } from './Controller/taap.con';
 import { CourseReview } from '../entities/CourseReview';
 import { CoreRevService } from './Services/coreRev.srv';
 import { CoreRevController } from './Controller/coreRev.con';
+import { UsersMedia } from '../entities/UsersMedia';
+import { UsersEducation } from '../entities/UsersEducation';
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { CoreRevController } from './Controller/coreRev.con';
       UsersEmail,
       UsersPhones,
       UsersRoles,
+      UsersMedia,
+      UsersEducation,
       Entities,
       JobPost,
       TalentApply,
@@ -44,8 +48,20 @@ import { CoreRevController } from './Controller/coreRev.con';
       signOptions: { expiresIn: '60d' },
     }),
   ],
-  providers: [UsersService, JopoService, TaapService, CoreRevService, LocalStrategy, JwtStrategy],
-  controllers: [UserController, JopoController, TaapController, CoreRevController],
+  providers: [
+    UsersService,
+    JopoService,
+    TaapService,
+    CoreRevService,
+    LocalStrategy,
+    JwtStrategy,
+  ],
+  controllers: [
+    UserController,
+    JopoController,
+    TaapController,
+    CoreRevController,
+  ],
   exports: [UsersService],
 })
 export class ServerModule {}
