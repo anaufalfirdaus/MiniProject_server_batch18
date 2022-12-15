@@ -59,22 +59,32 @@ export class UsersService {
     console.log(user);
     const compare = await Bcrypt.compare(pass, user.userPassword);
     if (compare) {
-      const { userPassword, ...result } = user;
-      return result;
+      // const { userPassword, ...result } = user;
+      delete user.userPassword;
+      return user;
     }
   }
 
-  public async login(user: any) {
-    console.log(user);
+  public async login(user: {
+    userName: string;
+    userEntityId: number;
+    usersEmail: [{ pmailAddress: string }];
+    usersRoles: [{ usroRole: { roleName: string } }];
+    userPhoto: string;
+  }): Promise<{ access_token: string }> {
     const payload = {
       username: user.userName,
       sub: user.userEntityId,
-      email: user.usersEmail ? user.usersEmail[0].pmailAddress : null,
-      roles: user.usersRoles ? user.usersRoles[0].usroRole.roleName : null,
+      email: user.usersEmail[0].pmailAddress,
+      roles: user.usersRoles[0].usroRole.roleName,
       userPhoto: user.userPhoto,
     };
+    const token = await this.jwtService.signAsync(payload, {
+      expiresIn: '1d',
+      secret: 'secretKey',
+    });
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: token,
     };
   }
 
@@ -122,56 +132,6 @@ export class UsersService {
     } catch (error) {
       return error.message;
     }
-  }
-
-  public async getProfile(userId: number) {
-    const user = await this.usersRepo.findOne({
-      relations: {
-        //* Roles
-        usersRoles: {
-          usroRole: true,
-        },
-        //* Emails
-        usersEmail: true,
-        //* Phones
-        usersPhones: true,
-        //* Address
-        usersAddresses: {
-          etadAddr: { addrCity: true },
-          etadAdty: true,
-        },
-        //* Education
-        usersEducations: true,
-        //* Experience
-        usersExperiences: true,
-        //* Skill
-        usersSkills: {
-          uskiSktyName: true,
-        },
-      },
-      where: [{ userEntityId: userId }],
-    });
-    // console.log(user);
-    const { userPassword, ...rest } = user;
-    const addressType = await this.addressTypeRepo.find();
-    const city = await this.cityRepo.find();
-    const jobType = await this.jobTypeRepo.find();
-    const skillType = await this.skillTypeRepo.find();
-    const statusType = await this.statusTypeRepo.find();
-    const listAddresses = await this.addressRepository.find();
-
-    return {
-      ...rest,
-      defaultEmail: user.usersEmail[0].pmailAddress,
-      defaultRole: user.usersRoles[0].usroRole.roleName,
-      defaultPhone: user.usersPhones[0].uspoPhone,
-      addressType,
-      city,
-      jobType,
-      skillType,
-      statusType,
-      listAddresses,
-    };
   }
 
   //* Helper Function to get new Address

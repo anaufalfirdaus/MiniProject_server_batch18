@@ -11,7 +11,17 @@ import {
   Delete,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { Users } from '../../entities/Users';
+import { GetUser } from '../Auth/decorator';
 import { UsersService } from '../Services/usr.srv';
+
+interface UserProfile {
+  userId: number;
+  username: string;
+  email: string;
+  roles: string;
+  userPhoto: string;
+}
 
 @Controller()
 export class UserController {
@@ -30,13 +40,14 @@ export class UserController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
-  async getProfile(@Request() req) {
-    return req.user;
-  }
-
-  @Get('profileuser/:id')
-  async getUserProfile(@Param('id', ParseIntPipe) id: number) {
-    return this.authService.getProfile(id);
+  async getProfile(@GetUser() user: Users): Promise<UserProfile> {
+    return {
+      userId: user.userEntityId,
+      username: user.userName,
+      email: user.usersEmail[0].pmailAddress,
+      roles: user.usersRoles[0].usroRole.roleName,
+      userPhoto: user.userPhoto,
+    };
   }
 
   @Get('getphone/:id')

@@ -27,6 +27,8 @@ import { Status } from '../entities/Status';
 import { CurriculumService } from './Services/curriculum.service';
 import { CurriculumController } from './Controller/curriculum.controller';
 import { ProgramEntity } from '../entities/ProgramEntity';
+import { ProfileController } from './Controller/profile.controller';
+import { ProfileService } from './Services/profile.service';
 
 @Module({
   imports: [
@@ -56,8 +58,14 @@ import { ProgramEntity } from '../entities/ProgramEntity';
       signOptions: { expiresIn: '60d' },
     }),
   ],
-  providers: [UsersService, CurriculumService, LocalStrategy, JwtStrategy],
-  controllers: [UserController, CurriculumController],
+  providers: [
+    UsersService,
+    CurriculumService,
+    ProfileService,
+    LocalStrategy,
+    JwtStrategy,
+  ],
+  controllers: [UserController, CurriculumController, ProfileController],
   exports: [UsersService],
 })
 export class ServerModule {}
