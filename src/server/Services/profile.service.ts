@@ -120,6 +120,7 @@ export class ProfileService {
       });
       Object.assign(user, userUpdate);
       const userUpdated = await this.user.save(user);
+      delete user.userPassword;
       return userUpdated;
     } catch (error) {
       throw new Error('Something went wrong, please try again later');
@@ -150,7 +151,9 @@ export class ProfileService {
       // update hash password on user Object
       user.userPassword = newHash;
       // save & return saved user
-      return await this.user.save(user);
+      const updatedUser = await this.user.save(user);
+      delete updatedUser.userPassword;
+      return updatedUser;
     } catch (error) {
       throw new Error('Something went wrong, please try again later');
     }
