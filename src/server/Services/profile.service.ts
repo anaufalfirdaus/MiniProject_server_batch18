@@ -348,8 +348,11 @@ export class ProfileService {
         userId,
         updateEmail.emailId,
       );
+
       updateEmailEntity.pmailAddress = updateEmail.email;
-      return await this.userEmail.save(updateEmailEntity);
+      updateEmailEntity.pmailModifiedDate = new Date(Date.now());
+      const updatedEmail = await this.userEmail.save(updateEmailEntity);
+      return await this.getEmailById(userId, updatedEmail.pmailId);
     } catch (error) {
       throw new InternalServerErrorException(
         'Something went wrong, please try again later.',
@@ -368,6 +371,7 @@ export class ProfileService {
       );
       updatePhoneEntity.uspoPhone = updatePhone.phone;
       updatePhoneEntity.uspoPontyCode.pontyCode = updatePhone.phoneCode;
+      updatePhoneEntity.uspoModifiedDate = new Date(Date.now());
       return await this.userPhone.save(updatePhoneEntity);
     } catch (error) {
       throw new InternalServerErrorException(
@@ -381,7 +385,7 @@ export class ProfileService {
     updateAddress: UpdateAddressDto,
   ): Promise<UsersAddress> {
     try {
-      const addressExist = await this.address.findOne({
+      const addressExist = await this.address.find({
         where: [
           { addrLine1: updateAddress.addressLine1 },
           { addrLine2: updateAddress.addressLine2 },
@@ -389,8 +393,10 @@ export class ProfileService {
         ],
       });
 
-      if (!addressExist) {
+      if (!(addressExist.length > 0)) {
+        console.log('addAddress');
         const newAddress = await this.addAddress(updateAddress);
+        console.log('addUserAddress');
         return await this.addUserAddress(
           userId,
           newAddress.addrId,
@@ -399,6 +405,8 @@ export class ProfileService {
       }
 
       // delete the address that want to update
+      console.log('remove');
+
       const removeAddressEntity = await this.getAddressById(
         userId,
         updateAddress.addressId,
@@ -411,13 +419,16 @@ export class ProfileService {
           'Something went wrong, please try again later.',
         );
       }
-
-      return await this.addUserAddress(
+      console.log('removed');
+      const newUserAddress = await this.addUserAddress(
         userId,
-        addressExist.addrId,
+        addressExist[0].addrId,
         updateAddress.addressType,
       );
+      return await this.getAddressById(userId, newUserAddress.etadAddrId);
     } catch (error) {
+      console.log('hello');
+
       throw new InternalServerErrorException(
         'Something went wrong, please try again later.',
       );
@@ -496,7 +507,8 @@ export class ProfileService {
   async removeEmail(userId: number, emailId: number): Promise<UsersEmail> {
     try {
       const removeEmailEntity = await this.getEmailById(userId, emailId);
-      return await this.userEmail.remove(removeEmailEntity);
+      await this.userEmail.remove(removeEmailEntity);
+      return removeEmailEntity;
     } catch (error) {
       throw new InternalServerErrorException(
         'Something went wrong, please try again later.',
@@ -576,10 +588,6 @@ export class ProfileService {
     try {
       const email = await this.userEmail.findOne({
         where: { pmailEntityId: userId, pmailId: emailId },
-        select: {
-          pmailId: true,
-          pmailAddress: true,
-        },
       });
       if (!email) throw new NotFoundException('Email not found');
 
@@ -595,10 +603,8 @@ export class ProfileService {
     try {
       const phone = await this.userPhone.findOne({
         where: { uspoEntity: { userEntityId: userId }, uspoPhoneId: phoneId },
-        select: {
-          uspoPhoneId: true,
-          uspoPhone: true,
-          uspoPontyCode: { pontyCode: true },
+        relations: {
+          uspoPontyCode: true,
         },
       });
 
@@ -627,16 +633,6 @@ export class ProfileService {
             addrCity: true,
           },
           etadAdty: true,
-        },
-        select: {
-          etadAddrId: true,
-          etadAddr: {
-            addrLine1: true,
-            addrLine2: true,
-            addrPostalCode: true,
-            addrCity: { cityId: true, cityName: true },
-          },
-          etadAdty: { adtyId: true, adtyName: true },
         },
       });
 
