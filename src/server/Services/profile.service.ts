@@ -29,6 +29,11 @@ import {
   AddEducationDto,
   AddExperienceDto,
   AddSkillDto,
+  UpdateEmailDto,
+  UpdatePhoneDto,
+  UpdateAddressDto,
+  UpdateEducationDto,
+  UpdateExperienceDto,
 } from '../Controller/profile/dto';
 
 const saltOrRounds = 10;
@@ -183,42 +188,18 @@ export class ProfileService {
     }
   }
 
-  async addAddress(
-    userId: number,
-    dataAddress: AddAddressDto,
-  ): Promise<UsersAddress> {
+  async addAddress(dataAddress: AddAddressDto): Promise<Address> {
     try {
-      // chech if address exist
-      const addressExist = await this.address.findOne({
-        where: [
-          { addrLine1: dataAddress.addressLine1 },
-          { addrLine2: dataAddress.addressLine2 },
-          { addrPostalCode: dataAddress.postalCode },
-        ],
+      const newAddressEntity = this.address.create({
+        addrLine1: dataAddress.addressLine1,
+        addrLine2: dataAddress.addressLine2,
+        addrPostalCode: dataAddress.postalCode,
+        addrCity: { cityId: dataAddress.cityId },
+        addrModifiedDate: new Date(Date.now()).toISOString(),
       });
-      // if address exist add to user Address
-      if (!addressExist) {
-        const newAddressEntity = this.address.create({
-          addrLine1: dataAddress.addressLine1,
-          addrLine2: dataAddress.addressLine2,
-          addrPostalCode: dataAddress.postalCode,
-          addrCity: { cityId: dataAddress.cityId },
-          addrModifiedDate: new Date(Date.now()).toISOString(),
-        });
 
-        const newAddress = await this.address.save(newAddressEntity);
-        return await this.addUserAddress(
-          userId,
-          newAddress.addrId,
-          dataAddress.addressType,
-        );
-      }
-
-      return await this.addUserAddress(
-        userId,
-        addressExist.addrId,
-        dataAddress.addressType,
-      );
+      const newAddress = await this.address.save(newAddressEntity);
+      return newAddress;
     } catch (error) {
       throw new InternalServerErrorException(
         'Something went Wrong, please try again later',
@@ -243,6 +224,40 @@ export class ProfileService {
     } catch (error) {
       throw new InternalServerErrorException(
         'Semething went wrong, please try again later',
+      );
+    }
+  }
+
+  async addAddressUserAddress(
+    userId: number,
+    dataAddress: AddAddressDto,
+  ): Promise<UsersAddress> {
+    try {
+      const addressExist = await this.address.findOne({
+        where: [
+          { addrLine1: dataAddress.addressLine1 },
+          { addrLine2: dataAddress.addressLine2 },
+          { addrPostalCode: dataAddress.postalCode },
+        ],
+      });
+
+      if (!addressExist) {
+        const newAddress = await this.addAddress(dataAddress);
+        return await this.addUserAddress(
+          userId,
+          newAddress.addrId,
+          dataAddress.addressType,
+        );
+      }
+
+      return await this.addUserAddress(
+        userId,
+        addressExist.addrId,
+        dataAddress.addressType,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later.',
       );
     }
   }
@@ -321,24 +336,261 @@ export class ProfileService {
     }
   }
 
+  async updateEmail(
+    userId: number,
+    updateEmail: UpdateEmailDto,
+  ): Promise<UsersEmail> {
+    try {
+      const updateEmailEntity = await this.getEmailById(
+        userId,
+        updateEmail.emailId,
+      );
+      updateEmailEntity.pmailAddress = updateEmail.email;
+      return await this.userEmail.save(updateEmailEntity);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later.',
+      );
+    }
+  }
+
+  async updatePhone(
+    userId: number,
+    updatePhone: UpdatePhoneDto,
+  ): Promise<UsersPhones> {
+    try {
+      const updatePhoneEntity = await this.getPhoneById(
+        userId,
+        updatePhone.phoneId,
+      );
+      updatePhoneEntity.uspoPhone = updatePhone.phone;
+      updatePhoneEntity.uspoPontyCode.pontyCode = updatePhone.phoneCode;
+      return await this.userPhone.save(updatePhoneEntity);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later.',
+      );
+    }
+  }
+
+  async updateUserAddress(
+    userId: number,
+    updateAddress: UpdateAddressDto,
+  ): Promise<UsersAddress> {
+    try {
+      const addressExist = await this.address.findOne({
+        where: [
+          { addrLine1: updateAddress.addressLine1 },
+          { addrLine2: updateAddress.addressLine2 },
+          { addrPostalCode: updateAddress.postalCode },
+        ],
+      });
+
+      if (!addressExist) {
+        const newAddress = await this.addAddress(updateAddress);
+        return await this.addUserAddress(
+          userId,
+          newAddress.addrId,
+          updateAddress.addressType,
+        );
+      }
+
+      // delete the address that want to update
+      const removeAddressEntity = await this.getAddressById(
+        userId,
+        updateAddress.addressId,
+      );
+
+      const removeAddress = await this.userAddress.remove(removeAddressEntity);
+
+      if (!removeAddress) {
+        throw new InternalServerErrorException(
+          'Something went wrong, please try again later.',
+        );
+      }
+
+      return await this.addUserAddress(
+        userId,
+        addressExist.addrId,
+        updateAddress.addressType,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later.',
+      );
+    }
+  }
+
+  async updateEducation(
+    userId: number,
+    updateEducation: UpdateEducationDto,
+  ): Promise<UsersEducation> {
+    try {
+      // find education
+      const updateEducationEntity = await this.userEducation.findOne({
+        where: { usduEntityId: userId, usduId: updateEducation.educationId },
+      });
+      // preparing update data
+      const update = {
+        usduSchool: updateEducation.school,
+        usduDegree: updateEducation.degree,
+        usduFieldStudy: updateEducation.fieldStudy,
+        usduGrade: updateEducation.grade,
+        usduStartDate: new Date(updateEducation.startDate).toISOString(),
+        usduEndDate: new Date(updateEducation.endDate).toISOString(),
+        usduActivities: updateEducation.activities,
+        usduDescription: updateEducation.desc,
+        usduModifiedDate: new Date(Date.now()).toISOString(),
+      };
+      // update entity
+      Object.assign(updateEducationEntity, update);
+      // save & return data
+      return await this.userEducation.save(updateEducationEntity);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later.',
+      );
+    }
+  }
+
+  async updateExperience(
+    userId: number,
+    updateExperience: UpdateExperienceDto,
+  ): Promise<UsersExperiences> {
+    try {
+      // get Experience Entity
+      const updateExperienceEntity = await this.getExpById(
+        userId,
+        updateExperience.expId,
+      );
+      // preparing update data
+      const update = {
+        usexTitle: updateExperience.title,
+        usexProfileHeadline: updateExperience.profileHeadline,
+        usexEmploymentType: updateExperience.employmentType,
+        usexCompanyName: updateExperience.companyName,
+        usexIsCurrent: updateExperience.isCurrent,
+        usexStartDate: new Date(updateExperience.startDate).toISOString(),
+        usexEndDate: new Date(updateExperience.endDate).toISOString(),
+        usexIndustry: updateExperience.industry,
+        usexDescription: updateExperience.desc,
+        usexExperienceType: updateExperience.experienceType,
+        usexCity: { cityId: updateExperience.cityId },
+      };
+      // update data experience
+      Object.assign(updateExperienceEntity, update);
+      // save/update experience
+      const updateExp = await this.userExperience.save(updateExperienceEntity);
+      // return experience
+      return await this.getExpById(userId, updateExp.usexId);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later.',
+      );
+    }
+  }
+
+  async removeEmail(userId: number, emailId: number): Promise<UsersEmail> {
+    try {
+      const removeEmailEntity = await this.getEmailById(userId, emailId);
+      return await this.userEmail.remove(removeEmailEntity);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later.',
+      );
+    }
+  }
+
+  async removePhone(userId: number, phoneId: number): Promise<UsersPhones> {
+    try {
+      const removePhoneEntity = await this.getPhoneById(userId, phoneId);
+      return await this.userPhone.remove(removePhoneEntity);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later.',
+      );
+    }
+  }
+
+  async removeAddress(
+    userId: number,
+    addressId: number,
+  ): Promise<UsersAddress> {
+    try {
+      const removeAddressEntity = await this.getAddressById(userId, addressId);
+      return await this.userAddress.remove(removeAddressEntity);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later.',
+      );
+    }
+  }
+
+  async removeEducation(
+    userId: number,
+    educationId: number,
+  ): Promise<UsersEducation> {
+    try {
+      const removeEduationEntity = await this.getEducationById(
+        userId,
+        educationId,
+      );
+      return await this.userEducation.remove(removeEduationEntity);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later.',
+      );
+    }
+  }
+
+  async removeExperience(
+    userId: number,
+    expId: number,
+  ): Promise<UsersExperiences> {
+    try {
+      const removeExperienceEntity = await this.getExpById(userId, expId);
+      return await this.userExperience.remove(removeExperienceEntity);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later.',
+      );
+    }
+  }
+
+  async removeSkill(userId: number, skillId: number): Promise<UsersSkill> {
+    try {
+      const removeSkillEntity = await this.getSkillById(userId, skillId);
+      return await this.userSkill.remove(removeSkillEntity);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later.',
+      );
+    }
+  }
+
   // Helper function
   async getEmailById(userId: number, emailId: number): Promise<UsersEmail> {
     try {
-      return await this.userEmail.findOne({
+      const email = await this.userEmail.findOne({
         where: { pmailEntityId: userId, pmailId: emailId },
         select: {
           pmailId: true,
           pmailAddress: true,
         },
       });
+      if (!email) throw new NotFoundException('Email not found');
+
+      return email;
     } catch (error) {
-      throw new NotFoundException('Email not found');
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later.',
+      );
     }
   }
 
   async getPhoneById(userId: number, phoneId: number): Promise<UsersPhones> {
     try {
-      return await this.userPhone.findOne({
+      const phone = await this.userPhone.findOne({
         where: { uspoEntity: { userEntityId: userId }, uspoPhoneId: phoneId },
         select: {
           uspoPhoneId: true,
@@ -346,8 +598,14 @@ export class ProfileService {
           uspoPontyCode: { pontyCode: true },
         },
       });
+
+      if (!phone) throw new NotFoundException('Phone not found');
+
+      return phone;
     } catch (error) {
-      throw new NotFoundException('Phone not found');
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later.',
+      );
     }
   }
 
@@ -356,7 +614,7 @@ export class ProfileService {
     addressId: number,
   ): Promise<UsersAddress> {
     try {
-      return await this.userAddress.findOne({
+      const address = await this.userAddress.findOne({
         where: {
           etadEntity: { userEntityId: userId },
           etadAddr: { addrId: addressId },
@@ -378,29 +636,59 @@ export class ProfileService {
           etadAdty: { adtyId: true, adtyName: true },
         },
       });
+
+      if (!address) throw new NotFoundException('Address not found');
+
+      return address;
     } catch (error) {
-      throw new NotFoundException('Address not found, please try again');
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later.',
+      );
+    }
+  }
+
+  async getEducationById(
+    userId: number,
+    educationId: number,
+  ): Promise<UsersEducation> {
+    try {
+      const education = await this.userEducation.findOne({
+        where: { usduEntityId: userId, usduId: educationId },
+      });
+
+      if (!education)
+        throw new NotFoundException(
+          'Education not found, please try again later.',
+        );
+      return education;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later.',
+      );
     }
   }
 
   async getExpById(userId: number, expId: number): Promise<UsersExperiences> {
     try {
-      return await this.userExperience.findOne({
+      const exp = await this.userExperience.findOne({
         where: { usexEntity: { userEntityId: userId }, usexId: expId },
         relations: {
           usexCity: true,
         },
       });
+
+      if (!exp) throw new NotFoundException('Experience not found');
+      return exp;
     } catch (error) {
-      throw new NotFoundException(
-        'Experience not found, please try again later',
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later.',
       );
     }
   }
 
   async getSkillById(userId: number, skillId: number): Promise<UsersSkill> {
     try {
-      return await this.userSkill.findOne({
+      const skill = await this.userSkill.findOne({
         where: {
           uskiEntity: { userEntityId: userId },
           uskiId: skillId,
@@ -409,8 +697,14 @@ export class ProfileService {
           uskiSktyName: true,
         },
       });
+
+      if (!skill)
+        throw new NotFoundException('Skill not found, please try again later');
+      return skill;
     } catch (error) {
-      throw new NotFoundException('Skill not found, please try again later');
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later.',
+      );
     }
   }
 }
