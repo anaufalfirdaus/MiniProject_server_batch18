@@ -143,7 +143,7 @@ export class ProfileController {
     return this.profile.updateExperience(userId, updateExperience);
   }
 
-  @HttpCode(HttpStatus.GONE)
+  @HttpCode(HttpStatus.ACCEPTED)
   @Delete('setting/email/:id')
   removeEmail(
     @GetUser('userEntityId') userId: number,
@@ -152,7 +152,7 @@ export class ProfileController {
     return this.profile.removeEmail(userId, emailId);
   }
 
-  @HttpCode(HttpStatus.GONE)
+  @HttpCode(HttpStatus.ACCEPTED)
   @Delete('setting/phone/:id')
   removePhone(
     @GetUser('userEntityId') userId: number,
@@ -161,7 +161,7 @@ export class ProfileController {
     return this.profile.removePhone(userId, phoneId);
   }
 
-  @HttpCode(HttpStatus.GONE)
+  @HttpCode(HttpStatus.ACCEPTED)
   @Delete('setting/address/:id')
   removeAddress(
     @GetUser('userEntityId') userId: number,
@@ -170,7 +170,7 @@ export class ProfileController {
     return this.profile.removeAddress(userId, addressId);
   }
 
-  @HttpCode(HttpStatus.GONE)
+  @HttpCode(HttpStatus.ACCEPTED)
   @Delete('setting/education/:id')
   removeEducation(
     @GetUser('userEntityId') userId: number,
@@ -179,7 +179,7 @@ export class ProfileController {
     return this.profile.removeEducation(userId, educationId);
   }
 
-  @HttpCode(HttpStatus.GONE)
+  @HttpCode(HttpStatus.ACCEPTED)
   @Delete('setting/experience/:id')
   removeExperience(
     @GetUser('userEntityId') userId: number,
@@ -188,7 +188,7 @@ export class ProfileController {
     return this.profile.removeExperience(userId, expId);
   }
 
-  @HttpCode(HttpStatus.GONE)
+  @HttpCode(HttpStatus.ACCEPTED)
   @Delete('setting/skill/:id')
   removeSkill(
     @GetUser('userEntityId') userId: number,
