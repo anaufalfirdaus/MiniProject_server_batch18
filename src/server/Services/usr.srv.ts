@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as Bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -10,6 +10,14 @@ import { UsersEmail } from '../../entities/UsersEmail';
 import { UsersRoles } from '../../entities/UsersRoles';
 import { UsersAddress } from '../../entities/UsersAddress';
 import { UsersSkill } from '../../entities/UsersSkill';
+
+interface User {
+  userName: string;
+  userEntityId: number;
+  usersEmail: [{ pmailAddress: string }];
+  usersRoles: [{ usroRole: { roleName: string } }];
+  userPhoto: string;
+}
 
 const saltOrRounds = 10;
 @Injectable()
@@ -46,13 +54,7 @@ export class UsersService {
     }
   }
 
-  public async login(user: {
-    userName: string;
-    userEntityId: number;
-    usersEmail: [{ pmailAddress: string }];
-    usersRoles: [{ usroRole: { roleName: string } }];
-    userPhoto: string;
-  }): Promise<{ access_token: string }> {
+  public async login(user: User): Promise<{ access_token: string }> {
     const payload = {
       username: user.userName,
       sub: user.userEntityId,

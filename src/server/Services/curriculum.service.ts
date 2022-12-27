@@ -19,7 +19,9 @@ export class CurriculumService {
     });
   }
 
-  async removeById(id: number) {
+  async removeById(
+    id: number,
+  ): Promise<{ id: number } | { info: string; message: string }> {
     const curriculum = await this.curriculumRepo.findOne({
       where: { progId: id },
     });

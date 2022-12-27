@@ -9,7 +9,7 @@ import { ServerModule } from './server/server.module';
       port: 5432,
       username: 'mattz',
       password: 'doraemon08',
-      database: 'codeacademy_miniproject',
+      database: 'codeid_miniproject',
       entities: ['src/entities/*{.ts,.js}'],
       synchronize: false,
     }),
