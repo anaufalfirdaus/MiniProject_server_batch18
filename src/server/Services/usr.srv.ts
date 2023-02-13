@@ -45,10 +45,8 @@ export class UsersService {
       },
       where: [{ userName: username }],
     });
-    console.log(user);
     const compare = await Bcrypt.compare(pass, user.userPassword);
     if (compare) {
-      // const { userPassword, ...result } = user;
       delete user.userPassword;
       return user;
     }
@@ -109,9 +107,9 @@ export class UsersService {
         usroModifiedDate: new Date(),
       });
       await this.usersRoles.save(userRole);
-
-      const { userPassword, ...rest } = user;
-      return rest;
+      // const { userPassword, ...rest } = user;
+      delete user.userPassword;
+      return user;
     } catch (error) {
       return error.message;
     }
@@ -144,8 +142,10 @@ export class UsersService {
     });
     Object.assign(user, fields);
     const userUpdate = await this.usersRepo.save(user);
-    const { userPassword, ...rest } = userUpdate;
-    return rest;
+    // const { userPassword, ...rest } = userUpdate;
+    delete userUpdate.userPassword;
+    return userUpdate;
+    // return rest
   }
 
   // TODO: Update Password
